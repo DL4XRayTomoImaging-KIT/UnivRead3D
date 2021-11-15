@@ -1,9 +1,5 @@
 import setuptools
 
-with open('requirements.txt') as file:
-    reqs = file.readlines()
-    reqs = [line.rstrip() for line in lines]
-
 setuptools.setup(
     name='univread',
     version='0.0.1',
@@ -12,5 +8,4 @@ setuptools.setup(
     description='Universal 3D file reader',
     url='https://github.com/DL4XRayTomoImaging-KIT/UnivRead3D',
     packages=setuptools.find_packages(),
-    install_requires=['nibabel', 'numpy', 'pynrrd', 'tifffile'],
 )
