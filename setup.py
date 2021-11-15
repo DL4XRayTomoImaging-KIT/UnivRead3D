@@ -12,5 +12,5 @@ setuptools.setup(
     description='Universal 3D file reader',
     url='https://github.com/DL4XRayTomoImaging-KIT/UnivRead3D',
     packages=setuptools.find_packages(),
-    install_requires=reqs,
+    install_requires=['nibabel', 'numpy', 'pynrrd', 'tifffile'],
 )
