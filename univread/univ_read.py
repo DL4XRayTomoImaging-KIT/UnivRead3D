@@ -9,7 +9,7 @@ def read(file_):
   fname, ext = os.path.splitext(file_)
   
   if ext == '.tif' or ext == '.tiff':
-    descriptor = tifffile.TiffFile(addr)
+    descriptor = tifffile.TiffFile(file_)
     img = descriptor.asarray()
     
     full_len = len(descriptor.pages)
