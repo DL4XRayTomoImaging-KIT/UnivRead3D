@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from glob import glob
-from tqdm.auto import tqdm
 
 import nrrd
 import tifffile
@@ -15,9 +14,9 @@ def read(file_):
     
     file_0 = tifffile.TiffFile(fnames[0]).asarray()
     if len(file_0.shape) == 2:
-      img = np.stack([tifffile.imread(fname) for fname in tqdm(fnames)])
+      img = np.stack([tifffile.imread(fname) for fname in fnames])
     else:
-      img = np.concatenate([tifffile.imread(fname) for fname in tqdm(fnames)], dtype=file_0.dtype)
+      img = np.concatenate([tifffile.imread(fname) for fname in fnames], dtype=file_0.dtype)
   
   else:
     fname, ext = os.path.splitext(file_)
