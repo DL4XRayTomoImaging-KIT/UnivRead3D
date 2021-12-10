@@ -16,7 +16,7 @@ def read(file_):
     if len(file_0.shape) == 2:
       img = np.stack([tifffile.imread(fname) for fname in fnames])
     else:
-      img = np.concatenate([tifffile.imread(fname) for fname in fnames], dtype=file_0.dtype)
+      img = np.concatenate([tifffile.imread(fname) for fname in fnames])
   
   else:
     fname, ext = os.path.splitext(file_)
@@ -28,7 +28,7 @@ def read(file_):
       loaded_len = len(img)
  
       if loaded_len < full_len:
-        img = np.concatenate(img, np.zeros((full_len - loaded_len, *img.shape[1:]), dtype=img.dtype))
+        img = np.concatenate(img, np.zeros((full_len - loaded_len, *img.shape[1:])))
         for i in range(loaded_len, full_len):
           img[i] = descriptor.pages[i].asarray()
  
