@@ -35,6 +35,6 @@ def read(file_):
     elif ext == '.nrrd':
       img = nrrd.read(file_)[0]
     elif ext == '.nii':
-      img = nib.load(file_)
+      img = nib.load(file_).get_fdata()
     
   return img
