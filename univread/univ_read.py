@@ -1,14 +1,16 @@
 import os
+import warnings
 import numpy as np
 from glob import glob
 
 import nrrd
 import tifffile
 import nibabel as nib
+from medpy.io import load as medload
 
 
 def read(file_):
-  if os.path.isdir(file_):
+  if os.path.isdir(file_):  # paginated tiffs
     fprefix = os.path.join(file_, '*.tif*')
     fnames = sorted(glob(fprefix))
     
@@ -19,9 +21,11 @@ def read(file_):
       img = np.concatenate([tifffile.imread(fname) for fname in fnames])
   
   else:
-    fname, ext = os.path.splitext(file_)
+    name = file_.split('.')
+    fname, ext = name[0], name[1:]
+    ext = f".{'.'.join(ext)}"  # ['nii', 'gz'] -> .nii.gz
   
-    if ext == '.tif' or ext == '.tiff':
+    if ext in ['.tif', '.tiff']:
       descriptor = tifffile.TiffFile(file_)
       img = descriptor.asarray()
       full_len = len(descriptor.pages)
@@ -34,7 +38,10 @@ def read(file_):
  
     elif ext == '.nrrd':
       img = nrrd.read(file_)[0]
-    elif ext == '.nii':
+    elif ext in ['.nii', '.nii.gz']:
       img = np.array(nib.load(file_).dataobj)
-    
+    else:  # load with medpy as the default case
+      warnings.warn('unrecognized file extension, proceeding to load with medpy')
+      img = medload(file_)[0]
+
   return img
