@@ -6,7 +6,7 @@ with open('requirements.txt') as file:
 
 setuptools.setup(
     name='univread',
-    version='0.0.1',
+    version='0.0.2',
     author='Jwalin Bhatt',
     author_email='jwalin.bhatt@gmail.com',
     description='Universal 3D file reader',
