@@ -17,7 +17,7 @@ def read(file_, lazy=False):
   # dir containing tiffs
   if os.path.isdir(file_):
     fnames = sorted(glob(f'{file_}/*.tif*'))
-    file_0 = tifffile.memmap(fnames[0])
+    file_0 = tifffile.memmap(fnames[0]) if lazy else tifffile.imread(fnames[0])
     
     if not lazy:
       if len(file_0.shape) == 2:  # dir containing 2d tiffs
