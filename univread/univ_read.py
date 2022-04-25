@@ -57,7 +57,7 @@ def read(file_, lazy=False):
   else:
     if file_.endswith(('.tif', '.tiff')):
       descriptor = tifffile.TiffFile(file_)
-      img = tifffile.memmap(file_)
+      img = tifffile.memmap(file_) if lazy else tifffile.imread(file_)
       full_len = len(descriptor.pages)
       loaded_len = len(img)
   
