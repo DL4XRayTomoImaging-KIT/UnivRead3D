@@ -79,7 +79,7 @@ def read(file_, lazy=False):
       img = nrrd.read(file_)[0]
     elif file_.endswith(('.nii', '.nii.gz')):
       img = nib.load(file_)
-      if not lazy: img = np.array(img.dataobj)
+      img = img.get_fdata() if lazy else np.array(img.dataobj)
     else:  # load with medpy as the default case
       if lazy: raise NotImplementedError('lazy reading not implemented for this extension')
       warnings.warn('unrecognized file extension, proceeding to load with medpy')
