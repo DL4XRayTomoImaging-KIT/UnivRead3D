@@ -34,7 +34,6 @@ def read(file_, lazy=False):
         
         with tempfile.NamedTemporaryFile() as f:
           img = np.memmap(f.name, dtype=file_0.dtype, mode='w+', shape=final_shape)
-
           for i,fname in enumerate(fnames):
             img[i] = tifffile.memmap(fname)
             img = np.memmap(f.name, dtype=file_0.dtype, mode='r+', shape=final_shape)
@@ -44,7 +43,6 @@ def read(file_, lazy=False):
 
         with tempfile.NamedTemporaryFile() as f:
           img = np.memmap(f.name, dtype=file_0.dtype, mode='w+', shape=final_shape)
-
           indx = 0
           for fname in fnames:
             descriptor = tifffile.TiffFile(fname)
@@ -57,11 +55,7 @@ def read(file_, lazy=False):
 
   # single files
   else:
-    name = file_.split('.')
-    fname, ext = name[0], name[1:]
-    ext = f".{'.'.join(ext)}"  # ['nii', 'gz'] -> .nii.gz
-
-    if ext in ['.tif', '.tiff']:
+    if file_.endswith(('.tif', '.tiff')):
       descriptor = tifffile.TiffFile(file_)
       img = tifffile.memmap(file_)
       full_len = len(descriptor.pages)
@@ -80,14 +74,14 @@ def read(file_, lazy=False):
               img[i] = page.asarray()
               img = np.memmap(f.name, dtype=img.dtype, mode='r+', shape=final_shape)
  
-    elif ext == '.nrrd':
-      if lazy: raise NotImplementedError(f'lazy reading not implemented for {ext}')
+    elif file_.endswith('.nrrd'):
+      if lazy: raise NotImplementedError('lazy reading not implemented for .nrrd')
       img = nrrd.read(file_)[0]
-    elif ext in ['.nii', '.nii.gz']:
+    elif file_.endswith(('.nii', '.nii.gz')):
       img = nib.load(file_)
       if not lazy: img = np.array(img.dataobj)
     else:  # load with medpy as the default case
-      if lazy: raise NotImplementedError(f'lazy reading not implemented for {ext}')
+      if lazy: raise NotImplementedError('lazy reading not implemented for this extension')
       warnings.warn('unrecognized file extension, proceeding to load with medpy')
       img = medload(file_)[0]
 
