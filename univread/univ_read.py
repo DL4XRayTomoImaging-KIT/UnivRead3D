@@ -17,9 +17,9 @@ def read(file_, lazy=False):
   # dir containing tiffs
   if os.path.isdir(file_):
     fnames = sorted(glob(f'{file_}/*.tif*'))
+    file_0 = tifffile.memmap(fnames[0])
     
     if not lazy:
-      file_0 = tifffile.imread(fnames[0])
       if len(file_0.shape) == 2:  # dir containing 2d tiffs
         img = np.stack([tifffile.imread(fname) for fname in fnames])
       else:  # dir containing 3d tiffs
@@ -27,10 +27,9 @@ def read(file_, lazy=False):
 
 
     else:
-      file_0 = tifffile.memmap(fnames[0])
+      shapes = np.array([tifffile.memmap(fname).shape for fname in fnames])
       
       if len(file_0.shape) == 2:  # dir containing 2d tiffs
-        shapes = [tifffile.memmap(fname).shape for fname in fnames]
         final_shape = (len(shapes), *shapes[0])
         
         with tempfile.NamedTemporaryFile() as f:
@@ -41,19 +40,18 @@ def read(file_, lazy=False):
             img = np.memmap(f.name, dtype=file_0.dtype, mode='r+', shape=final_shape)
         
       else:  # dir containing 3d tiffs
-        shapes = [tifffile.memmap(fname).shape for fname in fnames]
-        sum_shapes = np.cumsum(shapes, axis=0)
-        final_shape = (sum_shapes[-1][0], *shapes[0][1:])
+        final_shape = (sum(shapes[:,0]), *shapes[0][1:])
 
         with tempfile.NamedTemporaryFile() as f:
           img = np.memmap(f.name, dtype=file_0.dtype, mode='w+', shape=final_shape)
-          curr_indx = 0
 
-          for i,fname in enumerate(fnames):
-            nxt_indx = sum_shapes[i][0]
-            img[curr_indx:nxt_indx] = tifffile.memmap(fname)
-            curr_indx = nxt_indx
-            img = np.memmap(f.name, dtype=file_0.dtype, mode='r+', shape=final_shape)
+          indx = 0
+          for fname in fnames:
+            descriptor = tifffile.TiffFile(fname)
+            for page in descriptor.pages:
+              img[indx] = page.asarray()
+              img = np.memmap(f.name, dtype=file_0.dtype, mode='r+', shape=final_shape)
+              indx += 1
 
 
 
