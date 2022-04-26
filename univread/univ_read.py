@@ -70,6 +70,23 @@ def read_tifffile(file_, lazy):
   return img
 
 
+def read_nii(file_, lazy):
+  img = nib.load(file_)
+  img_dtype = img.header.get_data_dtype()
+  img = img.dataobj
+
+  if not lazy:
+    img = np.array(img)
+  else:  
+    img = np.asanyarray(img)
+    if type(img) != np.memmap:
+      raise TypeError(f'expected memmap but got {type(img)}')
+    if img_dtype != img.dtype:
+      raise TypeError(f"dtype in header ({img_dtype}) doesn't match the memmap dtype ({img.dtype})")  
+
+  return img
+
+
 def read(file_, lazy=False):
   # file_: path of the img file to be read
   # lazy: setting to True will return memmap instead of np array
@@ -86,8 +103,7 @@ def read(file_, lazy=False):
       if lazy: raise NotImplementedError('lazy reading not implemented for .nrrd')
       img = nrrd.read(file_)[0]
     elif file_.endswith(('.nii', '.nii.gz')):
-      img = nib.load(file_).dataobj
-      img = np.asanyarray(img) if lazy else np.array(img)
+      img = read_nii(file_, lazy)
     else:  # load with medpy as the default case
       if lazy: raise NotImplementedError('lazy reading not implemented for this extension')
       warnings.warn('unrecognized file extension, proceeding to load with medpy')
