@@ -10,6 +10,7 @@ import nibabel as nib
 from medpy.io import load as medload
 
 
+
 def read_tiffdir(fpath, lazy):
   fnames = sorted(glob(f'{fpath}/*.tif*'))
   file_0 = tifffile.memmap(fnames[0]) if lazy else tifffile.imread(fnames[0])
@@ -87,6 +88,21 @@ def read_nii(file_, lazy):
   return img
 
 
+def read_nrrd(file_, lazy):
+  if lazy:
+    raise NotImplementedError('lazy reading not implemented for .nrrd')
+  img = nrrd.read(file_)[0]
+  return img
+
+
+def read_default(file_, lazy):
+  if lazy:
+    raise NotImplementedError('lazy reading not implemented for this extension')
+  warnings.warn('unrecognized file extension, proceeding to load with medpy')
+  img = medload(file_)[0]
+  return img
+
+
 def read_np(file_, lazy):
   """
     Reads and returns file with standard numpy methods.
@@ -95,28 +111,28 @@ def read_np(file_, lazy):
   img = np.load(file_, mmap_mode=mmap_mode)
   return img
 
+
+
 def read(file_, lazy=False):
   # file_: path of the img file to be read
   # lazy: setting to True will return memmap instead of np array
-  
+
   # dir containing tiffs
   if os.path.isdir(file_):
-    img = read_tiffdir(file_, lazy)
+    reader = read_tiffdir
 
   # single files
   else:
     if file_.endswith(('.tif', '.tiff')):
-      img = read_tifffile(file_, lazy)
+      reader = read_tifffile
     elif file_.endswith('.nrrd'):
-      if lazy: raise NotImplementedError('lazy reading not implemented for .nrrd')
-      img = nrrd.read(file_)[0]
+      reader = read_nrrd
     elif file_.endswith(('.nii', '.nii.gz')):
-      img = read_nii(file_, lazy)
-    elif file_.endswith(('.npy', '.npz')):
-      img = read_np(file_, lazy)
+      reader = read_nii
+    elif file_.endswith('.npy'):
+      reader = read_np
     else:  # load with medpy as the default case
-      if lazy: raise NotImplementedError('lazy reading not implemented for this extension')
-      warnings.warn('unrecognized file extension, proceeding to load with medpy')
-      img = medload(file_)[0]
-
+      reader = read_default
+  
+  img = reader(file_, lazy)
   return img
