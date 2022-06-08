@@ -87,6 +87,14 @@ def read_nii(file_, lazy):
   return img
 
 
+def read_np(file_, lazy):
+  """
+    Reads and returns file with standard numpy methods.
+  """
+  mmap_mode = 'r' if lazy else None
+  img = np.load(file_, mmap_mode=mmap_mode)
+  return img
+
 def read(file_, lazy=False):
   # file_: path of the img file to be read
   # lazy: setting to True will return memmap instead of np array
@@ -104,6 +112,8 @@ def read(file_, lazy=False):
       img = nrrd.read(file_)[0]
     elif file_.endswith(('.nii', '.nii.gz')):
       img = read_nii(file_, lazy)
+    elif file_.endswith(('.npy', '.npz')):
+      img = read_np(file_, lazy)
     else:  # load with medpy as the default case
       if lazy: raise NotImplementedError('lazy reading not implemented for this extension')
       warnings.warn('unrecognized file extension, proceeding to load with medpy')
