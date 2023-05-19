@@ -2,3 +2,4 @@ nibabel
 numpy
 pynrrd
 tifffile
+medpy
